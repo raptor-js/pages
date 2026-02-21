@@ -18,12 +18,12 @@ class StubRemarkPlugin extends CompilerPlugin<never> {
 Deno.test("compiler compiles basic MDX content", async () => {
   const compiler = new Compiler();
   const tmpFile = await Deno.makeTempFile({ suffix: ".mdx" });
-  
+
   await Deno.writeTextFile(tmpFile, "# Hello World\n\nThis is a paragraph.");
 
   try {
     const result = await compiler.compile(tmpFile);
-    
+
     assertEquals(typeof result.content, "string");
     assertStringIncludes(result.content, "Hello World");
     assertStringIncludes(result.content, "This is a paragraph");
@@ -36,11 +36,14 @@ Deno.test("compiler compiles basic MDX content", async () => {
 Deno.test("compiler extracts frontmatter", async () => {
   const compiler = new Compiler();
   const tmpFile = await Deno.makeTempFile({ suffix: ".mdx" });
-  await Deno.writeTextFile(tmpFile, `---\ntitle: My Page\ntemplate: docs\ndescription: A test page\n---\n\n# Content\n`);
+  await Deno.writeTextFile(
+    tmpFile,
+    `---\ntitle: My Page\ntemplate: docs\ndescription: A test page\n---\n\n# Content\n`,
+  );
 
   try {
     const result = await compiler.compile(tmpFile);
-    
+
     assertEquals(result.frontmatter.title, "My Page");
     assertEquals(result.frontmatter.template, "docs");
     assertEquals(result.frontmatter.description, "A test page");
@@ -57,7 +60,7 @@ Deno.test("compiler returns empty frontmatter when none present", async () => {
 
   try {
     const result = await compiler.compile(tmpFile);
-    
+
     assertEquals(typeof result.frontmatter, "object");
     assertEquals(Object.keys(result.frontmatter).length, 0);
   } finally {
@@ -68,11 +71,14 @@ Deno.test("compiler returns empty frontmatter when none present", async () => {
 Deno.test("compiler renders GFM tables by default", async () => {
   const compiler = new Compiler();
   const tmpFile = await Deno.makeTempFile({ suffix: ".mdx" });
-  await Deno.writeTextFile(tmpFile, `| Column A | Column B |\n|----------|----------|\n| Cell 1   | Cell 2   |\n`);
+  await Deno.writeTextFile(
+    tmpFile,
+    `| Column A | Column B |\n|----------|----------|\n| Cell 1   | Cell 2   |\n`,
+  );
 
   try {
     const result = await compiler.compile(tmpFile);
-    
+
     assertStringIncludes(result.content, "<table");
     assertStringIncludes(result.content, "Column A");
     assertStringIncludes(result.content, "Cell 1");
@@ -88,7 +94,7 @@ Deno.test("compiler renders GFM strikethrough by default", async () => {
 
   try {
     const result = await compiler.compile(tmpFile);
-    
+
     assertStringIncludes(result.content, "<del>");
   } finally {
     await Deno.remove(tmpFile);
@@ -112,7 +118,10 @@ Deno.test("compiler accepts compiler plugins", async () => {
 Deno.test("compiler throws on missing file", async () => {
   const compiler = new Compiler();
 
-  await assertRejects(() => compiler.compile("/nonexistent/path/file.mdx"), Error);
+  await assertRejects(
+    () => compiler.compile("/nonexistent/path/file.mdx"),
+    Error,
+  );
 });
 
 Deno.test("compiler returns filename in result", async () => {
@@ -122,7 +131,7 @@ Deno.test("compiler returns filename in result", async () => {
 
   try {
     const result = await compiler.compile(tmpFile);
-    
+
     assertEquals(result.filename, tmpFile);
   } finally {
     await Deno.remove(tmpFile);
@@ -132,7 +141,7 @@ Deno.test("compiler returns filename in result", async () => {
 Deno.test("compiler handles UTF-8 characters", async () => {
   const compiler = new Compiler();
   const tmpFile = await Deno.makeTempFile({ suffix: ".mdx" });
-  
+
   await Deno.writeTextFile(tmpFile, "# こんにちは\n\nCafé résumé naïve.");
 
   try {

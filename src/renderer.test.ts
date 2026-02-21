@@ -33,7 +33,7 @@ Deno.test("renderer renders MDX content into template", async () => {
 
   try {
     const html = await renderer.render(mdxFile, "/hello");
-    
+
     assertStringIncludes(html, "Hello Renderer");
     assertStringIncludes(html, "Some content");
     assertStringIncludes(html, "<!DOCTYPE html>");
@@ -45,12 +45,14 @@ Deno.test("renderer renders MDX content into template", async () => {
 
 Deno.test("renderer uses frontmatter template field when present", async () => {
   const templateDir = await makeTemplateDir("custom");
-  const mdxFile = await makeMdxFile(`---\ntemplate: custom\n---\n\nCustom template content.`);
+  const mdxFile = await makeMdxFile(
+    `---\ntemplate: custom\n---\n\nCustom template content.`,
+  );
   const renderer = new Renderer({ templateDirectory: templateDir });
 
   try {
     const html = await renderer.render(mdxFile, "/custom");
-    
+
     assertStringIncludes(html, "Custom template content");
   } finally {
     await Deno.remove(templateDir, { recursive: true });
@@ -65,7 +67,7 @@ Deno.test("renderer defaults to docs template when no template in frontmatter", 
 
   try {
     const html = await renderer.render(mdxFile, "/no-template");
-    
+
     assertStringIncludes(html, "<!DOCTYPE html>");
   } finally {
     await Deno.remove(templateDir, { recursive: true });
@@ -86,7 +88,7 @@ Deno.test("renderer passes pathname to template context", async () => {
 
   try {
     const html = await renderer.render(mdxFile, "/my-path");
-    
+
     assertStringIncludes(html, "/my-path");
   } finally {
     await Deno.remove(templateDir, { recursive: true });
@@ -96,18 +98,20 @@ Deno.test("renderer passes pathname to template context", async () => {
 
 Deno.test("renderer passes frontmatter fields to template context", async () => {
   const templateDir = await Deno.makeTempDir();
-  
+
   await Deno.writeTextFile(
     `${templateDir}/docs.vto`,
     `<html><head><title>{{ frontmatter.title }}</title></head><body>{{ content }}</body></html>`,
   );
-  
-  const mdxFile = await makeMdxFile(`---\ntitle: My Doc Title\n---\n\nPage body.`);
+
+  const mdxFile = await makeMdxFile(
+    `---\ntitle: My Doc Title\n---\n\nPage body.`,
+  );
   const renderer = new Renderer({ templateDirectory: templateDir });
 
   try {
     const html = await renderer.render(mdxFile, "/docs");
-    
+
     assertStringIncludes(html, "My Doc Title");
   } finally {
     await Deno.remove(templateDir, { recursive: true });
@@ -118,11 +122,14 @@ Deno.test("renderer passes frontmatter fields to template context", async () => 
 Deno.test("renderer throws when template file is missing", async () => {
   const templateDir = await Deno.makeTempDir();
   const mdxFile = await makeMdxFile("Content.");
-  
+
   const renderer = new Renderer({ templateDirectory: templateDir });
 
   try {
-    await assertRejects(() => renderer.render(mdxFile, "/missing-template"), Error);
+    await assertRejects(
+      () => renderer.render(mdxFile, "/missing-template"),
+      Error,
+    );
   } finally {
     await Deno.remove(templateDir, { recursive: true });
     await Deno.remove(mdxFile);
