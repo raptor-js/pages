@@ -1,0 +1,9 @@
+# Ignore example directory.
+examples
+
+# Coverage reports
+cov_profile
+coverage-report
+
+# Ignore built dependencies.
+node_modules
