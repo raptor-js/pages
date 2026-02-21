@@ -1,20 +1,27 @@
 // deno-lint-ignore-file no-explicit-any
 
 import matter from "gray-matter";
-import remarkGfm from "remark-gfm";
 import { Fragment, h } from "preact";
 import { compile } from "@mdx-js/mdx";
 import { renderToString } from "preact-render-to-string";
 
 import type { PagesOptions } from "./pages.ts";
+import { HeadingsPlugin } from "./plugins/headings.ts";
+import { RemarkGfmPlugin } from "./plugins/remark-gfm.ts";
 
 export default class Compiler {
   private options?: PagesOptions;
 
   constructor(options?: PagesOptions) {
+    const defaults = this.initialiseOptions();
+
     this.options = {
-      ...this.initialiseOptions(),
+      ...defaults,
       ...options,
+      plugins: [
+        ...(defaults.plugins ?? []),
+        ...(options?.plugins ?? []),
+      ],
     };
   }
 
@@ -26,6 +33,10 @@ export default class Compiler {
    * @returns A compiled representation of the file.
    */
   public async compile(filename: string) {
+    const plugins = this.options?.plugins ?? [];
+
+    plugins.forEach((p) => p.reset());
+
     const fileContent = await this.readFile(filename);
 
     const { data: frontmatter, content } = matter(fileContent);
@@ -34,8 +45,8 @@ export default class Compiler {
       outputFormat: "function-body",
       jsxImportSource: "preact",
       development: false,
-      remarkPlugins: this.options?.remarkPlugins,
-      rehypePlugins: this.options?.rehypePlugins,
+      remarkPlugins: plugins.flatMap((p) => p.remark),
+      rehypePlugins: plugins.flatMap((p) => p.rehype),
     });
 
     const runtime = {
@@ -50,19 +61,26 @@ export default class Compiler {
 
     const html = renderToString(mdxContent());
 
+    const pluginData = Object.fromEntries(
+      plugins.map((p) => [p.key, p.getData()]),
+    );
+
     return {
-      html,
+      content: html,
+      config: this.options?.config,
       frontmatter,
       filename,
+      ...pluginData,
     };
   }
 
   private initialiseOptions(): PagesOptions {
     return {
-      remarkPlugins: [
-        remarkGfm
-      ]
-    }
+      plugins: [
+        new RemarkGfmPlugin(),
+        new HeadingsPlugin(),
+      ],
+    };
   }
 
   private async readFile(filePath: string): Promise<string> {

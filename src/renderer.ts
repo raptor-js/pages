@@ -13,7 +13,7 @@ export default class Renderer {
       ...options,
     }
 
-    this.compiler = new Compiler();
+    this.compiler = new Compiler(this.options);
   }
 
   /**
@@ -22,29 +22,26 @@ export default class Renderer {
    * @param filename The filename to compile contents.
    * @param pathname The converted pathname of the file.
    *
-   * @returns An HTML representation of the page.
+   * @returns An HTML string representation of the page.
    */
-  public async render(filename: string, pathname: string) {
-    const { html, frontmatter } = await this.compiler.compile(filename);
+  public async render(filename: string, pathname: string): Promise<string> {
+    const data = await this.compiler.compile(filename);
 
-    const htmlString = await this.view(
-      `${frontmatter.template ?? "docs"}.vto`,
+    return this.view(
+      `${data.frontmatter.template ?? "docs"}.vto`,
       {
-        content: html,
         pathname,
-        ...frontmatter,
+        ...data,
       },
     );
-
-    return htmlString;
   }
 
-  async view(file: string, data?: Record<string, unknown>): Promise<string> {
+  private async view(file: string, data?: Record<string, unknown>): Promise<string> {
     const env = vento({
       includes: this.options?.templateDirectory
     });
 
-    await env.cache.clear();
+    env.cache.clear();
 
     const view = await env.run(file, data);
 
@@ -53,7 +50,7 @@ export default class Renderer {
 
   private initialiseOptions(): PagesOptions {
     return {
-      templateDirectory: Deno.cwd() + "/templates"
+      templateDirectory: "./templates"
     }
   }
 }

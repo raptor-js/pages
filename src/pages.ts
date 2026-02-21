@@ -1,17 +1,19 @@
+// deno-lint-ignore-file no-explicit-any
+
 import { sep } from "node:path";
-import type { PluggableList } from "unified";
 import { Router, Route, HttpMethod } from "@raptor/router";
 import { type Context, type Middleware, ServerError } from "@raptor/framework";
 
 import Locator from "./locator.ts";
 import Renderer from "./renderer.ts";
+import type { CompilerPlugin } from "./interfaces/compiler-plugin.ts";
 
 export interface PagesOptions {
   path?: string;
+  config?: any;
   extensions?: string[];
   templateDirectory?: string;
-  rehypePlugins?: PluggableList;
-  remarkPlugins?: PluggableList;
+  plugins?: CompilerPlugin[];
 }
 
 export default class Pages {
@@ -71,32 +73,6 @@ export default class Pages {
     }
 
     return this.router.handle(context, next);
-  }
-
-  /**
-   * Register a custom remark plugin.
-   *
-   * @param plugin The remark plugin to register.
-   *
-   * @returns The current pages instance.
-   */
-  public registerRemarkPlugin(plugin: PluggableList[number]): this {
-    this.options.remarkPlugins = [...(this.options.remarkPlugins ?? []), plugin];
-
-    return this;
-  }
-
-  /**
-   * Register a custom rehype plugin.
-   *
-   * @param plugin The rehype plugin to register.
-   *
-   * @returns The current pages instance.
-   */
-  public registerRehypePlugin(plugin: PluggableList[number]): this {
-    this.options.rehypePlugins = [...(this.options.rehypePlugins ?? []), plugin];
-
-    return this;
   }
 
   /**
