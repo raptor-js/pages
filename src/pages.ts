@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 
 import { sep } from "node:path";
-import { Router, Route, HttpMethod } from "@raptor/router";
+import { HttpMethod, Route, Router } from "@raptor/router";
 import { type Context, type Middleware, ServerError } from "@raptor/framework";
 
 import Locator from "./locator.ts";
@@ -52,10 +52,13 @@ export default class Pages {
    *
    * @param context The request context.
    * @param next The next middleware function.
-   * 
+   *
    * @returns The success routing of the request to render.
    */
-  public async handler(context: Context, next: CallableFunction): Promise<unknown> {
+  public async handler(
+    context: Context,
+    next: CallableFunction,
+  ): Promise<unknown> {
     if (!this.options.path) {
       throw new ServerError("Please provide a path options configuration.");
     }
@@ -65,11 +68,13 @@ export default class Pages {
     for (const filename of files) {
       const pathname = this.filenameToRoutePathname(filename);
 
-      this.router.add(new Route({
-        method: HttpMethod.GET,
-        pathname,
-        handler: () => this.renderer.render(filename, pathname),
-      }));
+      this.router.add(
+        new Route({
+          method: HttpMethod.GET,
+          pathname,
+          handler: () => this.renderer.render(filename, pathname),
+        }),
+      );
     }
 
     return this.router.handle(context, next);
@@ -77,7 +82,7 @@ export default class Pages {
 
   /**
    * Convert filename to a route pathname.
-   *  
+   *
    * @param filename The filename to convert to valid pathname.
    *
    * @returns A valid pathname for route object.
@@ -123,7 +128,7 @@ export default class Pages {
    */
   private initialiseOptions(): PagesOptions {
     return {
-      extensions: ["mdx"]
-    }
+      extensions: ["mdx"],
+    };
   }
 }

@@ -11,14 +11,14 @@ export default class Renderer {
     this.options = {
       ...this.initialiseOptions(),
       ...options,
-    }
+    };
 
     this.compiler = new Compiler(this.options);
   }
 
   /**
    * Render a page's contents.
-   * 
+   *
    * @param filename The filename to compile contents.
    * @param pathname The converted pathname of the file.
    *
@@ -36,9 +36,12 @@ export default class Renderer {
     );
   }
 
-  private async view(file: string, data?: Record<string, unknown>): Promise<string> {
+  private async view(
+    file: string,
+    data?: Record<string, unknown>,
+  ): Promise<string> {
     const env = vento({
-      includes: this.options?.templateDirectory
+      includes: this.options?.templateDirectory,
     });
 
     env.cache.clear();
@@ -50,7 +53,7 @@ export default class Renderer {
 
   private initialiseOptions(): PagesOptions {
     return {
-      templateDirectory: "./templates"
-    }
+      templateDirectory: "./templates",
+    };
   }
 }

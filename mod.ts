@@ -2,9 +2,13 @@
 
 import helper from "./src/helper.ts";
 
-export { type PagesOptions, default as Pages } from "./src/pages.ts";
+export { default as Pages, type PagesOptions } from "./src/pages.ts";
 
-export type { Island } from "./src/interfaces/island.ts";
 export { CompilerPlugin } from "./src/interfaces/compiler-plugin.ts";
+export {
+  default as Indexer,
+  type IndexDocument,
+  type IndexerOptions,
+} from "./src/indexer.ts";
 
 export default helper;

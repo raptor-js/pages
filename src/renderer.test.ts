@@ -1,4 +1,4 @@
-import { assertStringIncludes, assertRejects } from "@std/assert";
+import { assertRejects, assertStringIncludes } from "@std/assert";
 
 import Renderer from "./renderer.ts";
 
@@ -153,7 +153,9 @@ Deno.test("renderer view method returns rendered string", async () => {
   const renderer = new Renderer({ templateDirectory: templateDir });
 
   try {
-    const result = await renderer.view("docs.vto", { message: "Hello from view" });
+    const result = await renderer.view("docs.vto", {
+      message: "Hello from view",
+    });
 
     assertStringIncludes(result, "Hello from view");
   } finally {

@@ -1,3 +1,5 @@
+// deno-lint-ignore-file no-explicit-any
+
 import { visit } from "unist-util-visit";
 import { toString } from "mdast-util-to-string";
 
@@ -31,7 +33,7 @@ export class HeadingsPlugin extends CompilerPlugin<Heading[]> {
           node.data.hProperties = node.data.hProperties || {};
           node.data.hProperties.id = id;
         });
-      }
+      },
     );
   }
 
