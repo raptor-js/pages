@@ -9,7 +9,7 @@
   <a href="https://jsr.io/@raptor"><img src="https://jsr.io/badges/@raptor" alt="" /></a>
 </p>
 
-## Raptor Pages
+## Raptor Pages (alpha)
 
 See more information about the Raptor framework here: <a href="https://raptorjs.com">https://raptorjs.com</a>.
 
