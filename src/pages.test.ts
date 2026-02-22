@@ -35,20 +35,24 @@ class StubPlugin extends CompilerPlugin<{ called: boolean }> {
 
 Deno.test("pages initialises with default extensions", () => {
   const pages = new Pages();
-  const opts =
-    (pages as unknown as { options: { extensions: string[] } }).options;
+  const config =
+    (pages as unknown as { config: { extensions: string[] } }).config;
 
-  assertEquals(opts.extensions, ["mdx"]);
+  assertEquals(config.extensions, ["mdx"]);
 });
 
 Deno.test("pages merges options with defaults", () => {
-  const pages = new Pages({ path: "/custom", extensions: ["md", "mdx"] });
-  const opts =
-    (pages as unknown as { options: { path: string; extensions: string[] } })
-      .options;
+  const pages = new Pages({
+    pageDirectory: "/custom",
+    extensions: ["md", "mdx"],
+  });
+  const config = (pages as unknown as {
+    config: { pageDirectory: string; extensions: string[] };
+  })
+    .config;
 
-  assertEquals(opts.path, "/custom");
-  assertEquals(opts.extensions, ["md", "mdx"]);
+  assertEquals(config.pageDirectory, "/custom");
+  assertEquals(config.extensions, ["md", "mdx"]);
 });
 
 Deno.test("pages handle property returns a middleware function", () => {
@@ -70,7 +74,7 @@ Deno.test("pages throws server error when path not configured", async () => {
 });
 
 Deno.test("pages converts index filename to root route", () => {
-  const pages = new Pages({ path: "/pages", extensions: ["mdx"] });
+  const pages = new Pages({ pageDirectory: "/pages", extensions: ["mdx"] });
   const fn =
     (pages as unknown as { filenameToRoutePathname(f: string): string })
       .filenameToRoutePathname.bind(pages);
@@ -79,7 +83,7 @@ Deno.test("pages converts index filename to root route", () => {
 });
 
 Deno.test("pages converts nested index to directory route", () => {
-  const pages = new Pages({ path: "/pages", extensions: ["mdx"] });
+  const pages = new Pages({ pageDirectory: "/pages", extensions: ["mdx"] });
   const fn =
     (pages as unknown as { filenameToRoutePathname(f: string): string })
       .filenameToRoutePathname.bind(pages);
@@ -88,7 +92,7 @@ Deno.test("pages converts nested index to directory route", () => {
 });
 
 Deno.test("pages strips extension from route", () => {
-  const pages = new Pages({ path: "/pages", extensions: ["mdx"] });
+  const pages = new Pages({ pageDirectory: "/pages", extensions: ["mdx"] });
   const fn =
     (pages as unknown as { filenameToRoutePathname(f: string): string })
       .filenameToRoutePathname.bind(pages);
@@ -97,7 +101,7 @@ Deno.test("pages strips extension from route", () => {
 });
 
 Deno.test("pages converts dynamic segment to route parameter", () => {
-  const pages = new Pages({ path: "/pages", extensions: ["mdx"] });
+  const pages = new Pages({ pageDirectory: "/pages", extensions: ["mdx"] });
   const fn =
     (pages as unknown as { filenameToRoutePathname(f: string): string })
       .filenameToRoutePathname.bind(pages);
@@ -108,10 +112,10 @@ Deno.test("pages converts dynamic segment to route parameter", () => {
 Deno.test("pages accepts compiler plugins via constructor", () => {
   const plugin = new StubPlugin();
   const pages = new Pages({ plugins: [plugin] });
-  const opts =
-    (pages as unknown as { options: { plugins: unknown[] } }).options;
+  const config =
+    (pages as unknown as { config: { plugins: unknown[] } }).config;
 
-  assertEquals(opts.plugins?.length, 1);
+  assertEquals(config.plugins?.length, 1);
 });
 
 Deno.test("compiler plugin exposes remark plugins", () => {
@@ -143,8 +147,8 @@ Deno.test("pages preserves plugins in options", () => {
   const pluginA = new StubPlugin();
   const pluginB = new StubPlugin();
   const pages = new Pages({ plugins: [pluginA, pluginB] });
-  const opts =
-    (pages as unknown as { options: { plugins: unknown[] } }).options;
+  const config =
+    (pages as unknown as { config: { plugins: unknown[] } }).config;
 
-  assertEquals(opts.plugins?.length, 2);
+  assertEquals(config.plugins?.length, 2);
 });

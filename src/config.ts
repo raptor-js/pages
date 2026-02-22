@@ -29,5 +29,5 @@ export interface Config {
   /**
    * Optional metadata to pass through the compiler.
    */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
