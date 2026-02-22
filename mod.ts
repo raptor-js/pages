@@ -10,7 +10,6 @@ export { CompilerPlugin } from "./src/interfaces/compiler-plugin.ts";
 export {
   default as Indexer,
   type IndexDocument,
-  type IndexerOptions,
 } from "./src/indexer.ts";
 
 export default helper;
