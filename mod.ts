@@ -7,9 +7,6 @@ export { default as Pages } from "./src/pages.ts";
 
 export { CompilerPlugin } from "./src/interfaces/compiler-plugin.ts";
 
-export {
-  default as Indexer,
-  type IndexDocument,
-} from "./src/indexer.ts";
+export { default as Indexer, type IndexDocument } from "./src/indexer.ts";
 
 export default helper;
