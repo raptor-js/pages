@@ -1,19 +1,19 @@
 import vento from "ventojs";
 
 import Compiler from "./compiler.ts";
-import type { PagesOptions } from "./pages.ts";
+import type { Config } from "./config.ts";
 
 export default class Renderer {
-  private options?: PagesOptions;
+  private config?: Config;
   private compiler: Compiler;
 
-  constructor(options?: PagesOptions) {
-    this.options = {
-      ...this.initialiseOptions(),
-      ...options,
+  constructor(config?: Config) {
+    this.config = {
+      ...this.initialiseDefaultConfig(),
+      ...config,
     };
 
-    this.compiler = new Compiler(this.options);
+    this.compiler = new Compiler(this.config);
   }
 
   /**
@@ -41,7 +41,7 @@ export default class Renderer {
     data?: Record<string, unknown>,
   ): Promise<string> {
     const env = vento({
-      includes: this.options?.templateDirectory,
+      includes: this.config?.templateDirectory,
     });
 
     env.cache.clear();
@@ -51,7 +51,7 @@ export default class Renderer {
     return view.content;
   }
 
-  private initialiseOptions(): PagesOptions {
+  private initialiseDefaultConfig(): Config {
     return {
       templateDirectory: "./templates",
     };

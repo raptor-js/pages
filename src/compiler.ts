@@ -5,22 +5,22 @@ import { Fragment, h } from "preact";
 import { compile } from "@mdx-js/mdx";
 import { renderToString } from "preact-render-to-string";
 
-import type { PagesOptions } from "./pages.ts";
+import type { Config } from "./config.ts";
 import { HeadingsPlugin } from "./plugins/headings.ts";
 import { RemarkGfmPlugin } from "./plugins/remark-gfm.ts";
 
 export default class Compiler {
-  private options?: PagesOptions;
+  private config?: Config;
 
-  constructor(options?: PagesOptions) {
-    const defaults = this.initialiseOptions();
+  constructor(config?: Config) {
+    const defaults = this.initialiseDefaultConfig();
 
-    this.options = {
+    this.config = {
       ...defaults,
-      ...options,
+      ...config,
       plugins: [
         ...(defaults.plugins ?? []),
-        ...(options?.plugins ?? []),
+        ...(config?.plugins ?? []),
       ],
     };
   }
@@ -33,7 +33,7 @@ export default class Compiler {
    * @returns A compiled representation of the file.
    */
   public async compile(filename: string) {
-    const plugins = this.options?.plugins ?? [];
+    const plugins = this.config?.plugins ?? [];
 
     plugins.forEach((p) => p.reset());
 
@@ -67,14 +67,14 @@ export default class Compiler {
 
     return {
       content: html,
-      config: this.options?.config,
+      metadata: this.config?.metadata,
       frontmatter,
       filename,
       ...pluginData,
     };
   }
 
-  private initialiseOptions(): PagesOptions {
+  private initialiseDefaultConfig(): Config {
     return {
       plugins: [
         new RemarkGfmPlugin(),

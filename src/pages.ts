@@ -1,41 +1,31 @@
-// deno-lint-ignore-file no-explicit-any
-
 import { sep } from "node:path";
 import { HttpMethod, Route, Router } from "@raptor/router";
 import { type Context, type Middleware, ServerError } from "@raptor/framework";
 
 import Locator from "./locator.ts";
 import Renderer from "./renderer.ts";
-import type { CompilerPlugin } from "./interfaces/compiler-plugin.ts";
-
-export interface PagesOptions {
-  path?: string;
-  config?: any;
-  extensions?: string[];
-  templateDirectory?: string;
-  plugins?: CompilerPlugin[];
-}
+import type { Config } from "./config.ts";
 
 export default class Pages {
   private router: Router;
   private locator: Locator;
   private renderer: Renderer;
-  private options: PagesOptions;
+  private config: Config;
 
   /**
    * Initialize the pages middleware.
    *
-   * @param options Optional configuration options.
+   * @param config Optional configuration.
    */
-  constructor(options?: PagesOptions) {
-    this.options = {
-      ...this.initialiseOptions(),
-      ...options,
+  constructor(config?: Config) {
+    this.config = {
+      ...this.initialiseDefaultConfig(),
+      ...config,
     };
 
     this.router = new Router();
-    this.renderer = new Renderer(this.options);
-    this.locator = new Locator(this.options);
+    this.renderer = new Renderer(this.config);
+    this.locator = new Locator(this.config);
   }
 
   /**
@@ -59,11 +49,11 @@ export default class Pages {
     context: Context,
     next: CallableFunction,
   ): Promise<unknown> {
-    if (!this.options.path) {
-      throw new ServerError("Please provide a path options configuration.");
+    if (!this.config.pageDirectory) {
+      throw new ServerError("Please provide a path configuration.");
     }
 
-    const files = await this.locator.find(this.options.path);
+    const files = await this.locator.find(this.config.pageDirectory);
 
     for (const filename of files) {
       const pathname = this.filenameToRoutePathname(filename);
@@ -88,17 +78,17 @@ export default class Pages {
    * @returns A valid pathname for route object.
    */
   private filenameToRoutePathname(filename: string): string {
-    if (!this.options.path) {
-      throw new ServerError("Please provide a path options configuration.");
+    if (!this.config.pageDirectory) {
+      throw new ServerError("Please provide a page directory configuration.");
     }
 
-    let route = filename.replace(this.options.path, "");
+    let route = filename.replace(this.config.pageDirectory, "");
 
-    if (!this.options.extensions) {
-      throw new ServerError("Please provide extensions options configuration.");
+    if (!this.config.extensions) {
+      throw new ServerError("Please provide extensions configuration.");
     }
 
-    for (const ext of this.options.extensions) {
+    for (const ext of this.config.extensions) {
       if (route.endsWith(ext)) {
         route = route.slice(0, -`.${ext}`.length);
 
@@ -122,11 +112,11 @@ export default class Pages {
   }
 
   /**
-   * Initialise the middleware options.
+   * Initialise the middleware config.
    *
-   * @returns An initialise set of options.
+   * @returns An initialise set of config.
    */
-  private initialiseOptions(): PagesOptions {
+  private initialiseDefaultConfig(): Config {
     return {
       extensions: ["mdx"],
     };

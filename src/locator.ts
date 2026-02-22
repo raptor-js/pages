@@ -1,19 +1,19 @@
 import { join } from "node:path";
 import { ServerError } from "@raptor/framework";
 
-import type { PagesOptions } from "./pages.ts";
+import type { Config } from "./config.ts";
 
-export interface DirEntry {
+export interface DirectoryEntry {
   name: string;
   isDirectory: boolean;
   isFile: boolean;
 }
 
 export default class Locator {
-  private options: PagesOptions;
+  private config: Config;
 
-  constructor(options: PagesOptions) {
-    this.options = options;
+  constructor(config: Config) {
+    this.config = config;
   }
 
   /**
@@ -24,14 +24,14 @@ export default class Locator {
    * @returns A list of found files.
    */
   public async find(path: string): Promise<string[]> {
-    if (!this.options.extensions) {
-      throw new ServerError("Please provide extensions options configuration.");
+    if (!this.config.extensions) {
+      throw new ServerError("Please provide extensions configuration.");
     }
 
     const files: string[] = [];
 
     await this.walk(path, (filePath) => {
-      const valid = this.options.extensions?.some(
+      const valid = this.config.extensions?.some(
         (ext) => filePath.endsWith(ext),
       );
 
@@ -78,10 +78,10 @@ export default class Locator {
    *
    * @returns A list of directory entries.
    */
-  private async readDirectory(path: string): Promise<DirEntry[]> {
+  private async readDirectory(path: string): Promise<DirectoryEntry[]> {
     // deno-lint-ignore no-explicit-any
     if (typeof (globalThis as any).Deno !== "undefined") {
-      const entries: DirEntry[] = [];
+      const entries: DirectoryEntry[] = [];
 
       // deno-lint-ignore no-explicit-any
       for await (const entry of (globalThis as any).Deno.readDir(path)) {

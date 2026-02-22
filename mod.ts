@@ -2,9 +2,11 @@
 
 import helper from "./src/helper.ts";
 
-export { default as Pages, type PagesOptions } from "./src/pages.ts";
+export type { Config } from "./src/config.ts";
+export { default as Pages } from "./src/pages.ts";
 
 export { CompilerPlugin } from "./src/interfaces/compiler-plugin.ts";
+
 export {
   default as Indexer,
   type IndexDocument,

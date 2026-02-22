@@ -1,7 +1,7 @@
 import matter from "gray-matter";
 
 import Locator from "./locator.ts";
-import type { PagesOptions } from "./pages.ts";
+import type { Config } from "./config.ts";
 
 export interface IndexDocument {
   id: string;
@@ -12,18 +12,13 @@ export interface IndexDocument {
   headings: string[];
 }
 
-export interface IndexerOptions {
-  output: string;
-  pagesOptions: PagesOptions;
-}
-
 export default class Indexer {
   private locator: Locator;
-  private options: IndexerOptions;
+  private config: Config;
 
-  constructor(options: IndexerOptions) {
-    this.options = options;
-    this.locator = new Locator(options.pagesOptions);
+  constructor(config: Config) {
+    this.config = config;
+    this.locator = new Locator(config);
   }
 
   /**
@@ -32,11 +27,11 @@ export default class Indexer {
    * @returns The list of indexed documents.
    */
   public async build(): Promise<IndexDocument[]> {
-    if (!this.options.pagesOptions.path) {
+    if (!this.config.pageDirectory) {
       throw new Error("Please provide a path in pagesOptions.");
     }
 
-    const files = await this.locator.find(this.options.pagesOptions.path);
+    const files = await this.locator.find(this.config.pageDirectory);
 
     const documents: IndexDocument[] = [];
 
@@ -103,7 +98,7 @@ export default class Indexer {
 
     if (typeof Deno !== "undefined") {
       await Deno.writeTextFile(
-        this.options.output,
+        this.config.searchIndexDirectory,
         JSON.stringify(documents, null, 2),
       );
       return;
@@ -112,15 +107,15 @@ export default class Indexer {
     const { writeFile } = await import("node:fs/promises");
 
     await writeFile(
-      this.options.output,
+      this.config.searchIndexDirectory!,
       JSON.stringify(documents, null, 2),
       "utf-8",
     );
   }
 
   private fileToPathname(filename: string): string {
-    const basePath = this.options.pagesOptions.path!;
-    const extensions = this.options.pagesOptions.extensions ?? ["mdx"];
+    const basePath = this.config.pageDirectory!;
+    const extensions = this.config.extensions ?? ["mdx"];
 
     let route = filename.replace(basePath, "");
 
@@ -152,7 +147,9 @@ export default class Indexer {
     }
 
     const { readFile } = await import("node:fs/promises");
+
     const buffer = await readFile(filePath);
+
     return buffer.toString("utf-8");
   }
 }
