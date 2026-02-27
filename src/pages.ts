@@ -1,6 +1,11 @@
 import { sep } from "node:path";
-import { HttpMethod, Route, Router } from "@raptor/router";
-import { type Context, type Middleware, ServerError } from "@raptor/framework";
+import { Route, Router } from "@raptor/router";
+import {
+  type Context,
+  HttpMethod,
+  type Middleware,
+  ServerError,
+} from "@raptor/framework";
 
 import Locator from "./locator.ts";
 import Renderer from "./renderer.ts";
