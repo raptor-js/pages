@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { ServerError } from "@raptor/framework";
+import { ServerError } from "@raptor/kernel";
 
 import type { Config } from "./config.ts";
 

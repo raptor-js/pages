@@ -63,7 +63,7 @@ body:
       label: Minimal Reproduction
       description: Provide the smallest amount of code that reproduces the issue
       placeholder: |
-        import { Kernel } from "@raptor/framework";
+        import { Kernel } from "@raptor/kernel";
         import { Validator } from "@raptor/validator";
 
         const app = new Kernel();

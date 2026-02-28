@@ -5,7 +5,7 @@ import {
   HttpMethod,
   type Middleware,
   ServerError,
-} from "@raptor/framework";
+} from "@raptor/kernel";
 
 import Locator from "./locator.ts";
 import Renderer from "./renderer.ts";
