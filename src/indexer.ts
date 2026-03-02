@@ -12,10 +12,25 @@ export interface IndexDocument {
   headings: string[];
 }
 
+/**
+ * Builds a search index from page content.
+ */
 export default class Indexer {
+  /**
+   * The locator service to find page files.
+   */
   private locator: Locator;
+
+  /**
+   * Configuration for the package.
+   */
   private config: Config;
 
+  /**
+   * @constructor
+   *
+   * @param config The configuration options.
+   */
   constructor(config: Config) {
     this.config = config;
     this.locator = new Locator(config);
@@ -48,6 +63,10 @@ export default class Indexer {
 
   /**
    * Parse a single file and return its index document.
+   *
+   * @param file The file to index.
+   *
+   * @returns A promise resolving an indexed document.
    */
   private async indexFile(file: string): Promise<IndexDocument> {
     const raw = await this.readFile(file);
@@ -68,6 +87,10 @@ export default class Indexer {
 
   /**
    * Strip MDX/markdown syntax and return plain text suitable for indexing.
+   *
+   * @param content The content to strip MDX from.
+   *
+   * @returns A clean, text-based string for indexing.
    */
   private extractText(content: string): string {
     return content
@@ -84,6 +107,10 @@ export default class Indexer {
 
   /**
    * Extract heading text from MDX content.
+   *
+   * @param content The content to extract headings from.
+   *
+   * @returns An array of found headings.
    */
   private extractHeadings(content: string): string[] {
     return Array.from(content.matchAll(/^#{1,6}\s+(.+)$/gm)).map((m) => m[1]);
@@ -91,6 +118,10 @@ export default class Indexer {
 
   /**
    * Write the index documents to the configured output path as JSON.
+   *
+   * @param documents The indexed documents to be written to disk.
+   *
+   * @returns void
    */
   private async write(documents: IndexDocument[]): Promise<void> {
     // deno-lint-ignore no-explicit-any
@@ -101,6 +132,7 @@ export default class Indexer {
         this.config.searchIndexDirectory,
         JSON.stringify(documents, null, 2),
       );
+
       return;
     }
 
@@ -135,7 +167,7 @@ export default class Indexer {
       route = "/" + route;
     }
 
-    return route;
+    return route.slice(0, -1);
   }
 
   private async readFile(filePath: string): Promise<string> {

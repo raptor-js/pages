@@ -22,6 +22,23 @@ export interface Config {
   plugins?: CompilerPlugin[];
 
   /**
+   * Static build configuration.
+   *
+   * If enabled, pages will be pre-compiled during build phase.
+   */
+  static?: {
+    /**
+     * Enable static build mode.
+     */
+    enabled: boolean;
+
+    /**
+     * Output directory for pre-compiled pages.
+     */
+    outputDirectory: string;
+  };
+
+  /**
    * The directory to store the search index file.
    */
   searchIndexDirectory?: string;
