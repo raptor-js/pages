@@ -26,3 +26,9 @@ jobs:
 
       - name: run tests
         run: npm test
+
+      # Packages take whatever 0.x kernel and router an app has, so they are also tested against the newest ones.
+      - name: run tests against the latest kernel and router
+        run: |
+          npm install --no-save @raptor-js/kernel@latest @raptor-js/router@latest
+          npm test
