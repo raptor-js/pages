@@ -124,7 +124,7 @@ export default class Indexer {
    * @returns void
    */
   private async write(documents: IndexDocument[]): Promise<void> {
-    // deno-lint-ignore no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: the runtime global has no types here
     const Deno = (globalThis as any).Deno;
 
     if (typeof Deno !== "undefined") {
@@ -171,7 +171,7 @@ export default class Indexer {
   }
 
   private async readFile(filePath: string): Promise<string> {
-    // deno-lint-ignore no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: the runtime global has no types here
     const Deno = (globalThis as any).Deno;
 
     if (typeof Deno !== "undefined") {

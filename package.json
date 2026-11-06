@@ -1,0 +1,51 @@
+{
+  "name": "@raptor-js/pages",
+  "version": "0.6.0",
+  "description": "File-based MDX pages for the Raptor framework, rendered through Vento templates.",
+  "license": "MIT",
+  "homepage": "https://raptorjs.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raptor-js/pages.git"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/mod.d.ts",
+      "default": "./dist/mod.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check",
+    "format": "biome check --write",
+    "test": "node --test 'src/**/*.test.ts'",
+    "test:watch": "node --test --watch 'src/**/*.test.ts'",
+    "test:coverage": "node --test --experimental-test-coverage 'src/**/*.test.ts'",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@mdx-js/mdx": "^3.1.1",
+    "@raptor-js/kernel": "^0.28.0",
+    "@raptor-js/router": "^0.24.0",
+    "@raptor-js/types": "^0.4.0",
+    "gray-matter": "^4.0.3",
+    "mdast-util-to-string": "^4.0.0",
+    "preact": "^10.29.8",
+    "preact-render-to-string": "^6.8.2",
+    "remark-gfm": "^4.0.1",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.2.0",
+    "ventojs": "^2.4.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.6",
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  }
+}

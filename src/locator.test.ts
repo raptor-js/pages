@@ -1,65 +1,69 @@
-import { assertEquals, assertRejects } from "@std/assert";
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import Locator from "./locator.ts";
 
 async function makeTempDir(): Promise<string> {
-  return await Deno.makeTempDir();
+  return await mkdtemp(join(tmpdir(), "pages-"));
 }
 
-Deno.test("locator finds files with matching extension", async () => {
+test("locator finds files with matching extension", async () => {
   const dir = await makeTempDir();
 
-  await Deno.writeTextFile(`${dir}/page.mdx`, "content");
-  await Deno.writeTextFile(`${dir}/other.txt`, "content");
+  await writeFile(`${dir}/page.mdx`, "content");
+  await writeFile(`${dir}/other.txt`, "content");
 
   const locator = new Locator({ extensions: ["mdx"] });
 
   try {
     const files = await locator.find(dir);
 
-    assertEquals(files.length, 1);
-    assertEquals(files[0].endsWith("page.mdx"), true);
+    assert.deepStrictEqual(files.length, 1);
+    assert.deepStrictEqual(files[0].endsWith("page.mdx"), true);
   } finally {
-    await Deno.remove(dir, { recursive: true });
+    await rm(dir, { recursive: true });
   }
 });
 
-Deno.test("locator finds files recursively in nested directories", async () => {
+test("locator finds files recursively in nested directories", async () => {
   const dir = await makeTempDir();
   const subDir = `${dir}/nested`;
 
-  await Deno.mkdir(subDir);
-  await Deno.writeTextFile(`${dir}/root.mdx`, "root");
-  await Deno.writeTextFile(`${subDir}/child.mdx`, "child");
+  await mkdir(subDir);
+  await writeFile(`${dir}/root.mdx`, "root");
+  await writeFile(`${subDir}/child.mdx`, "child");
 
   const locator = new Locator({ extensions: ["mdx"] });
 
   try {
     const files = await locator.find(dir);
 
-    assertEquals(files.length, 2);
+    assert.deepStrictEqual(files.length, 2);
   } finally {
-    await Deno.remove(dir, { recursive: true });
+    await rm(dir, { recursive: true });
   }
 });
 
-Deno.test("locator returns empty array when no matching files", async () => {
+test("locator returns empty array when no matching files", async () => {
   const dir = await makeTempDir();
 
-  await Deno.writeTextFile(`${dir}/file.txt`, "content");
+  await writeFile(`${dir}/file.txt`, "content");
 
   const locator = new Locator({ extensions: ["mdx"] });
 
   try {
     const files = await locator.find(dir);
 
-    assertEquals(files.length, 0);
+    assert.deepStrictEqual(files.length, 0);
   } finally {
-    await Deno.remove(dir, { recursive: true });
+    await rm(dir, { recursive: true });
   }
 });
 
-Deno.test("locator returns empty array for empty directory", async () => {
+test("locator returns empty array for empty directory", async () => {
   const dir = await makeTempDir();
 
   const locator = new Locator({ extensions: ["mdx"] });
@@ -67,60 +71,59 @@ Deno.test("locator returns empty array for empty directory", async () => {
   try {
     const files = await locator.find(dir);
 
-    assertEquals(files.length, 0);
+    assert.deepStrictEqual(files.length, 0);
   } finally {
-    await Deno.remove(dir, { recursive: true });
+    await rm(dir, { recursive: true });
   }
 });
 
-Deno.test("locator supports multiple extensions", async () => {
+test("locator supports multiple extensions", async () => {
   const dir = await makeTempDir();
 
-  await Deno.writeTextFile(`${dir}/page.mdx`, "content");
-  await Deno.writeTextFile(`${dir}/page.md`, "content");
-  await Deno.writeTextFile(`${dir}/ignored.txt`, "content");
+  await writeFile(`${dir}/page.mdx`, "content");
+  await writeFile(`${dir}/page.md`, "content");
+  await writeFile(`${dir}/ignored.txt`, "content");
 
   const locator = new Locator({ extensions: ["mdx", "md"] });
 
   try {
     const files = await locator.find(dir);
 
-    assertEquals(files.length, 2);
+    assert.deepStrictEqual(files.length, 2);
   } finally {
-    await Deno.remove(dir, { recursive: true });
+    await rm(dir, { recursive: true });
   }
 });
 
-Deno.test("locator throws server error when extensions not configured", async () => {
+test("locator throws server error when extensions not configured", async () => {
   const dir = await makeTempDir();
 
   const locator = new Locator({});
 
   try {
-    await assertRejects(
+    await assert.rejects(
       () => locator.find(dir),
-      Error,
-      "extensions",
+      (error) => error instanceof Error && error.message.includes("extensions"),
     );
   } finally {
-    await Deno.remove(dir, { recursive: true });
+    await rm(dir, { recursive: true });
   }
 });
 
-Deno.test("locator deeply nested files are found", async () => {
+test("locator deeply nested files are found", async () => {
   const dir = await makeTempDir();
 
-  await Deno.mkdir(`${dir}/a/b/c`, { recursive: true });
-  await Deno.writeTextFile(`${dir}/a/b/c/deep.mdx`, "deep");
+  await mkdir(`${dir}/a/b/c`, { recursive: true });
+  await writeFile(`${dir}/a/b/c/deep.mdx`, "deep");
 
   const locator = new Locator({ extensions: ["mdx"] });
 
   try {
     const files = await locator.find(dir);
 
-    assertEquals(files.length, 1);
-    assertEquals(files[0].endsWith("deep.mdx"), true);
+    assert.deepStrictEqual(files.length, 1);
+    assert.deepStrictEqual(files[0].endsWith("deep.mdx"), true);
   } finally {
-    await Deno.remove(dir, { recursive: true });
+    await rm(dir, { recursive: true });
   }
 });

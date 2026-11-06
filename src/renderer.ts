@@ -27,13 +27,10 @@ export default class Renderer {
   public async render(filename: string, pathname: string): Promise<string> {
     const data = await this.compiler.compile(filename);
 
-    return this.view(
-      `${data.frontmatter.template ?? "docs"}.vto`,
-      {
-        pathname,
-        ...data,
-      },
-    );
+    return this.view(`${data.frontmatter.template ?? "docs"}.vto`, {
+      pathname,
+      ...data,
+    });
   }
 
   private async view(

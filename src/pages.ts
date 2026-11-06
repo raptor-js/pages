@@ -1,12 +1,13 @@
 import { sep } from "node:path";
-import { Route, Router } from "@raptor/router";
+import { Route, Router } from "@raptor-js/router";
 
+import { ServerError } from "@raptor-js/kernel";
 import {
   type Context,
   HttpMethod,
   type Middleware,
-  ServerError,
-} from "@raptor/kernel";
+  type Next,
+} from "@raptor-js/types";
 
 import Locator from "./locator.ts";
 import Renderer from "./renderer.ts";
@@ -105,7 +106,7 @@ export default class Pages {
    * @returns A middleware response.
    */
   public get handle(): Middleware {
-    return (context: Context, next: CallableFunction) => {
+    return (context: Context, next: Next) => {
       return this.handler(context, next);
     };
   }
@@ -118,10 +119,7 @@ export default class Pages {
    *
    * @returns The success routing of the request to render.
    */
-  public async handler(
-    context: Context,
-    next: CallableFunction,
-  ): Promise<unknown> {
+  public async handler(context: Context, next: Next): Promise<unknown> {
     await this.initialize();
 
     return this.router.handle(context, next);
@@ -153,9 +151,7 @@ export default class Pages {
       }
     }
 
-    console.warn(
-      `Static page not found for ${pathname}, compiling on-demand`,
-    );
+    console.warn(`Static page not found for ${pathname}, compiling on-demand`);
 
     return this.renderer.render(filename, pathname);
   }
@@ -170,12 +166,13 @@ export default class Pages {
   private async getFromDisk(pathname: string): Promise<string | null> {
     const outputDir = this.config.static!.outputDirectory;
 
-    const filePath = pathname === "/"
-      ? `${outputDir}/index.html`
-      : `${outputDir}${pathname}.html`;
+    const filePath =
+      pathname === "/"
+        ? `${outputDir}/index.html`
+        : `${outputDir}${pathname}.html`;
 
     try {
-      // deno-lint-ignore no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: the runtime global has no types here
       const Deno = (globalThis as any).Deno;
 
       if (typeof Deno !== "undefined") {

@@ -1,12 +1,28 @@
-import { assertRejects, assertStringIncludes } from "@std/assert";
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { randomUUID } from "node:crypto";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import Renderer from "./renderer.ts";
 import { CompilerPlugin } from "./interfaces/compiler-plugin.ts";
 
-async function makeTemplateDir(templateName = "docs"): Promise<string> {
-  const dir = await Deno.makeTempDir();
+/**
+ * Create an empty temporary file with the given suffix.
+ */
+async function makeTempFile(suffix: string): Promise<string> {
+  const file = join(tmpdir(), `${randomUUID()}${suffix}`);
 
-  await Deno.writeTextFile(
+  await writeFile(file, "");
+
+  return file;
+}
+
+async function makeTemplateDir(templateName = "docs"): Promise<string> {
+  const dir = await mkdtemp(join(tmpdir(), "pages-"));
+
+  await writeFile(
     `${dir}/${templateName}.vto`,
     `<!DOCTYPE html><html><body>{{ content }}</body></html>`,
   );
@@ -15,8 +31,8 @@ async function makeTemplateDir(templateName = "docs"): Promise<string> {
 }
 
 async function makeMdxFile(content: string): Promise<string> {
-  const file = await Deno.makeTempFile({ suffix: ".mdx" });
-  await Deno.writeTextFile(file, content);
+  const file = await makeTempFile(".mdx");
+  await writeFile(file, content);
   return file;
 }
 
@@ -26,7 +42,7 @@ class StubPlugin extends CompilerPlugin<never> {
   reset = () => {};
 }
 
-Deno.test("renderer renders MDX content into template", async () => {
+test("renderer renders MDX content into template", async () => {
   const templateDir = await makeTemplateDir("docs");
   const mdxFile = await makeMdxFile("# Hello Renderer\n\nSome content.");
   const renderer = new Renderer({ templateDirectory: templateDir });
@@ -34,16 +50,16 @@ Deno.test("renderer renders MDX content into template", async () => {
   try {
     const html = await renderer.render(mdxFile, "/hello");
 
-    assertStringIncludes(html, "Hello Renderer");
-    assertStringIncludes(html, "Some content");
-    assertStringIncludes(html, "<!DOCTYPE html>");
+    assert.ok(html.includes("Hello Renderer"));
+    assert.ok(html.includes("Some content"));
+    assert.ok(html.includes("<!DOCTYPE html>"));
   } finally {
-    await Deno.remove(templateDir, { recursive: true });
-    await Deno.remove(mdxFile);
+    await rm(templateDir, { recursive: true });
+    await rm(mdxFile);
   }
 });
 
-Deno.test("renderer uses frontmatter template field when present", async () => {
+test("renderer uses frontmatter template field when present", async () => {
   const templateDir = await makeTemplateDir("custom");
   const mdxFile = await makeMdxFile(
     `---\ntemplate: custom\n---\n\nCustom template content.`,
@@ -53,14 +69,14 @@ Deno.test("renderer uses frontmatter template field when present", async () => {
   try {
     const html = await renderer.render(mdxFile, "/custom");
 
-    assertStringIncludes(html, "Custom template content");
+    assert.ok(html.includes("Custom template content"));
   } finally {
-    await Deno.remove(templateDir, { recursive: true });
-    await Deno.remove(mdxFile);
+    await rm(templateDir, { recursive: true });
+    await rm(mdxFile);
   }
 });
 
-Deno.test("renderer defaults to docs template when no template in frontmatter", async () => {
+test("renderer defaults to docs template when no template in frontmatter", async () => {
   const templateDir = await makeTemplateDir("docs");
   const mdxFile = await makeMdxFile("No frontmatter here.");
   const renderer = new Renderer({ templateDirectory: templateDir });
@@ -68,17 +84,17 @@ Deno.test("renderer defaults to docs template when no template in frontmatter", 
   try {
     const html = await renderer.render(mdxFile, "/no-template");
 
-    assertStringIncludes(html, "<!DOCTYPE html>");
+    assert.ok(html.includes("<!DOCTYPE html>"));
   } finally {
-    await Deno.remove(templateDir, { recursive: true });
-    await Deno.remove(mdxFile);
+    await rm(templateDir, { recursive: true });
+    await rm(mdxFile);
   }
 });
 
-Deno.test("renderer passes pathname to template context", async () => {
-  const templateDir = await Deno.makeTempDir();
+test("renderer passes pathname to template context", async () => {
+  const templateDir = await mkdtemp(join(tmpdir(), "pages-"));
 
-  await Deno.writeTextFile(
+  await writeFile(
     `${templateDir}/docs.vto`,
     `<html><body>{{ pathname }}{{ content }}</body></html>`,
   );
@@ -89,17 +105,17 @@ Deno.test("renderer passes pathname to template context", async () => {
   try {
     const html = await renderer.render(mdxFile, "/my-path");
 
-    assertStringIncludes(html, "/my-path");
+    assert.ok(html.includes("/my-path"));
   } finally {
-    await Deno.remove(templateDir, { recursive: true });
-    await Deno.remove(mdxFile);
+    await rm(templateDir, { recursive: true });
+    await rm(mdxFile);
   }
 });
 
-Deno.test("renderer passes frontmatter fields to template context", async () => {
-  const templateDir = await Deno.makeTempDir();
+test("renderer passes frontmatter fields to template context", async () => {
+  const templateDir = await mkdtemp(join(tmpdir(), "pages-"));
 
-  await Deno.writeTextFile(
+  await writeFile(
     `${templateDir}/docs.vto`,
     `<html><head><title>{{ frontmatter.title }}</title></head><body>{{ content }}</body></html>`,
   );
@@ -112,31 +128,31 @@ Deno.test("renderer passes frontmatter fields to template context", async () => 
   try {
     const html = await renderer.render(mdxFile, "/docs");
 
-    assertStringIncludes(html, "My Doc Title");
+    assert.ok(html.includes("My Doc Title"));
   } finally {
-    await Deno.remove(templateDir, { recursive: true });
-    await Deno.remove(mdxFile);
+    await rm(templateDir, { recursive: true });
+    await rm(mdxFile);
   }
 });
 
-Deno.test("renderer throws when template file is missing", async () => {
-  const templateDir = await Deno.makeTempDir();
+test("renderer throws when template file is missing", async () => {
+  const templateDir = await mkdtemp(join(tmpdir(), "pages-"));
   const mdxFile = await makeMdxFile("Content.");
 
   const renderer = new Renderer({ templateDirectory: templateDir });
 
   try {
-    await assertRejects(
+    await assert.rejects(
       () => renderer.render(mdxFile, "/missing-template"),
       Error,
     );
   } finally {
-    await Deno.remove(templateDir, { recursive: true });
-    await Deno.remove(mdxFile);
+    await rm(templateDir, { recursive: true });
+    await rm(mdxFile);
   }
 });
 
-Deno.test("renderer accepts compiler plugins via options", async () => {
+test("renderer accepts compiler plugins via options", async () => {
   const templateDir = await makeTemplateDir("docs");
   const mdxFile = await makeMdxFile("Plugin test.");
 
@@ -148,9 +164,9 @@ Deno.test("renderer accepts compiler plugins via options", async () => {
   try {
     const html = await renderer.render(mdxFile, "/plugins");
 
-    assertStringIncludes(html, "Plugin test");
+    assert.ok(html.includes("Plugin test"));
   } finally {
-    await Deno.remove(templateDir, { recursive: true });
-    await Deno.remove(mdxFile);
+    await rm(templateDir, { recursive: true });
+    await rm(mdxFile);
   }
 });

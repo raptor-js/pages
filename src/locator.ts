@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { ServerError } from "@raptor/kernel";
+import { ServerError } from "@raptor-js/kernel";
 
 import type { Config } from "./config.ts";
 
@@ -31,8 +31,8 @@ export default class Locator {
     const files: string[] = [];
 
     await this.walk(path, (filePath) => {
-      const valid = this.config.extensions?.some(
-        (ext) => filePath.endsWith(ext),
+      const valid = this.config.extensions?.some((ext) =>
+        filePath.endsWith(ext),
       );
 
       if (!valid) {
@@ -79,11 +79,11 @@ export default class Locator {
    * @returns A list of directory entries.
    */
   private async readDirectory(path: string): Promise<DirectoryEntry[]> {
-    // deno-lint-ignore no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: the runtime global has no types here
     if (typeof (globalThis as any).Deno !== "undefined") {
       const entries: DirectoryEntry[] = [];
 
-      // deno-lint-ignore no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: the runtime global has no types here
       for await (const entry of (globalThis as any).Deno.readDir(path)) {
         entries.push(entry);
       }

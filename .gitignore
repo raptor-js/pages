@@ -7,3 +7,6 @@ coverage-report
 
 # Ignore built dependencies.
 node_modules
+
+# Ignore build output
+dist

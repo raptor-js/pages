@@ -1,5 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
-
 import matter from "gray-matter";
 import { Fragment, h } from "preact";
 import { compile } from "@mdx-js/mdx";
@@ -18,10 +16,7 @@ export default class Compiler {
     this.config = {
       ...defaults,
       ...config,
-      plugins: [
-        ...(defaults.plugins ?? []),
-        ...(config?.plugins ?? []),
-      ],
+      plugins: [...(defaults.plugins ?? []), ...(config?.plugins ?? [])],
     };
   }
 
@@ -76,14 +71,12 @@ export default class Compiler {
 
   private initialiseDefaultConfig(): Config {
     return {
-      plugins: [
-        new RemarkGfmPlugin(),
-        new HeadingsPlugin(),
-      ],
+      plugins: [new RemarkGfmPlugin(), new HeadingsPlugin()],
     };
   }
 
   private async readFile(filePath: string): Promise<string> {
+    // biome-ignore lint/suspicious/noExplicitAny: the runtime global has no types here
     const Deno = (globalThis as any).Deno;
 
     if (typeof Deno !== "undefined") {

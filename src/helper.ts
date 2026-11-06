@@ -1,4 +1,4 @@
-import type { Middleware } from "@raptor/kernel";
+import type { Middleware } from "@raptor-js/types";
 
 import Pages from "./pages.ts";
 import type { Config } from "./config.ts";

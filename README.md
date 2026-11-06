@@ -4,9 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/raptor-js/pages/actions"><img src="https://github.com/raptor-js/pages/workflows/ci/badge.svg" alt="Build Status"></a>
-  <a href="jsr.io/@raptor/pages"><img src="https://jsr.io/badges/@raptor/pages" /></a>
-  <a href="jsr.io/@raptor/pages score"><img src="https://jsr.io/badges/@raptor/pages/score" /></a>
-  <a href="https://jsr.io/@raptor"><img src="https://jsr.io/badges/@raptor" alt="" /></a>
+  <a href="https://www.npmjs.com/package/@raptor-js/pages"><img src="https://img.shields.io/npm/v/@raptor-js/pages" alt="npm version" /></a>
 </p>
 
 ## Raptor Pages (alpha)

@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
+// biome-ignore-all lint/suspicious/noExplicitAny: the mdast nodes from unified are untyped here
 
 import { visit } from "unist-util-visit";
 import { toString } from "mdast-util-to-string";
@@ -12,7 +12,10 @@ export interface Heading {
 }
 
 const slugify = (text: string): string =>
-  text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 export class HeadingsPlugin extends CompilerPlugin<Heading[]> {
   key = "headings";
@@ -21,20 +24,18 @@ export class HeadingsPlugin extends CompilerPlugin<Heading[]> {
   constructor() {
     super();
 
-    this.registerRemark(
-      () => (tree: any) => {
-        visit(tree, "heading", (node: any) => {
-          const text = toString(node);
-          const id = slugify(text);
+    this.registerRemark(() => (tree: any) => {
+      visit(tree, "heading", (node: any) => {
+        const text = toString(node);
+        const id = slugify(text);
 
-          this.headings.push({ id, text, level: node.depth });
+        this.headings.push({ id, text, level: node.depth });
 
-          node.data = node.data || {};
-          node.data.hProperties = node.data.hProperties || {};
-          node.data.hProperties.id = id;
-        });
-      },
-    );
+        node.data = node.data || {};
+        node.data.hProperties = node.data.hProperties || {};
+        node.data.hProperties.id = id;
+      });
+    });
   }
 
   getData() {

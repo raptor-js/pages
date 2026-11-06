@@ -1,5 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
-
 import { join } from "node:path";
 
 import Locator from "./locator.ts";
@@ -93,9 +91,7 @@ export default class Builder {
       return;
     }
 
-    throw new Error(
-      "Please provide `outputDirectory` in static config.",
-    );
+    throw new Error("Please provide `outputDirectory` in static config.");
   }
 
   /**
@@ -111,9 +107,8 @@ export default class Builder {
     await this.ensureDirectory(outputDir);
 
     for (const page of pages) {
-      const filePath = page.pathname === "/"
-        ? "index.html"
-        : `${page.pathname.slice(1)}.html`;
+      const filePath =
+        page.pathname === "/" ? "index.html" : `${page.pathname.slice(1)}.html`;
 
       const fullPath = join(outputDir, filePath);
 
@@ -178,6 +173,7 @@ export default class Builder {
    * @returns void
    */
   private async ensureDirectory(path: string): Promise<void> {
+    // biome-ignore lint/suspicious/noExplicitAny: the runtime global has no types here
     const Deno = (globalThis as any).Deno;
 
     if (typeof Deno !== "undefined") {
@@ -206,6 +202,7 @@ export default class Builder {
    * @returns void
    */
   private async writeFile(path: string, content: string): Promise<void> {
+    // biome-ignore lint/suspicious/noExplicitAny: the runtime global has no types here
     const Deno = (globalThis as any).Deno;
 
     if (typeof Deno !== "undefined") {
